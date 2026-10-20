@@ -329,8 +329,8 @@ curl http://localhost:8080/api/programs
 
 ## Репозитории
 
-- [user-service](https://github.com/C00lness/user-service) — пользователи, JWT, Kafka Consumer
-- [program-service](https://github.com/C00lness/program-service) — программы гибки, Kafka Producer
+- [user-service](https://github.com/C00lness/user_service_machine) — пользователи, JWT, Kafka Consumer
+- [program-service](https://github.com/C00lness/program_service_machine) — программы гибки, Kafka Producer
 - [api-gateway](https://github.com/C00lness/api-gateway) — единая точка входа
 
 ---

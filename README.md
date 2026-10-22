@@ -247,6 +247,15 @@ bin/kafka-topics.sh --create \
     --bootstrap-server localhost:9092 \
     --partitions 3 \
     --replication-factor 1 2>/dev/null || echo "Топик уже существует (если нужно изменить партиции, удалите его и создайте заново)"
+# ==========================================
+# 7. Redis (для Rate Limiting)
+# ==========================================
+echo ""
+echo "[4/7] Установка Redis..."
+sudo apt install -y redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+echo "Redis запущен на порту 6379"
 
 echo ""
 echo "======================================"

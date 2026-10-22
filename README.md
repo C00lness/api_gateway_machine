@@ -104,7 +104,7 @@ Kafka, PostgreSQL, Spring Security, JWT, API Gateway на edge-узле (про�
 
 | Технология | Назначение |
 |------------|-----------|
-| Java 17 | Язык разработки |
+| Java 21 | Язык разработки |
 | Spring Boot 3.4.0 | Фреймворк |
 | Spring Cloud Gateway | API Gateway |
 | Spring Security + JWT (jjwt 0.11.5) | Аутентификация |
@@ -150,12 +150,12 @@ echo " Установка инфраструктуры (edge-узел)"
 echo "======================================"
 
 # ==========================================
-# 1. Java 17
+# 1. Java 21
 # ==========================================
 echo ""
-echo "[1/6] Установка Java 17..."
+echo "[1/6] Установка Java 21..."
 sudo apt update
-sudo apt install -y openjdk-17-jdk
+sudo apt install -y openjdk-21-jdk
 
 java -version
 

@@ -153,7 +153,7 @@ echo "======================================"
 # 1. Java 21
 # ==========================================
 echo ""
-echo "[1/6] Установка Java 21..."
+echo "[1/7] Установка Java 21..."
 sudo apt update
 sudo apt install -y openjdk-21-jdk
 
@@ -163,7 +163,7 @@ java -version
 # 2. PostgreSQL 16
 # ==========================================
 echo ""
-echo "[2/6] Установка PostgreSQL 16..."
+echo "[2/7] Установка PostgreSQL 16..."
 sudo apt install -y postgresql postgresql-contrib
 
 sudo systemctl enable postgresql
@@ -173,7 +173,7 @@ sudo systemctl start postgresql
 # 3. Создание пользователя и баз
 # ==========================================
 echo ""
-echo "[3/6] Создание пользователя и баз данных..."
+echo "[3/7] Создание пользователя и баз данных..."
 
 sudo -u postgres psql <<EOF
 DO \$\$
@@ -197,7 +197,7 @@ echo "Базы созданы: userdb, program_db (user: appuser, password: secr
 # 4. Kafka (KRaft, без Zookeeper)
 # ==========================================
 echo ""
-echo "[4/6] Установка Kafka..."
+echo "[4/7] Установка Kafka..."
 
 KAFKA_VERSION="3.7.0"
 KAFKA_DIR="/opt/kafka"
@@ -216,7 +216,7 @@ cd /opt/kafka
 # 5. Форматирование и запуск Kafka
 # ==========================================
 echo ""
-echo "[5/6] Форматирование и запуск Kafka..."
+echo "[5/7] Форматирование и запуск Kafka..."
 
 # Очистка старого хранилища (если есть)
 if [ -d "/tmp/kraft-combined-logs" ]; then
@@ -240,18 +240,19 @@ sleep 20
 # 6. Создание топика
 # ==========================================
 echo ""
-echo "[6/6] Создание топика program-events (3 партиции)..."
+echo "[6/7] Создание топика program-events (3 партиции)..."
 
 bin/kafka-topics.sh --create \
     --topic program-events \
     --bootstrap-server localhost:9092 \
     --partitions 3 \
     --replication-factor 1 2>/dev/null || echo "Топик уже существует (если нужно изменить партиции, удалите его и создайте заново)"
+
 # ==========================================
 # 7. Redis (для Rate Limiting)
 # ==========================================
 echo ""
-echo "[4/7] Установка Redis..."
+echo "[7/7] Установка Redis..."
 sudo apt install -y redis-server
 sudo systemctl enable redis-server
 sudo systemctl start redis-server
@@ -343,6 +344,37 @@ curl http://localhost:8080/api/programs
 
 ---
 
+## Масштабирование и работа с узкими местами
+
+Проект изначально разрабатывался с учетом масштабирования на парк оборудования. Вот ключевые архитектурные решения:
+
+### 1. Java 21 + Virtual Threads
+Миграция с Java 17 на Java 21 LTS с включением Virtual Threads (Project Loom). Это позволило:
+- Обрабатывать тысячи одновременных HTTP-запросов без оверхеда на память
+- Отказаться от ручного тюнинга пулов потоков Tomcat
+- Увеличить throughput в разы для I/O-bound операций (ожидание БД, Kafka)
+
+*Важно: В коде заменены блокировки `synchronized` на `ReentrantLock` для предотвращения pinning (закрепления) carrier-потоков ОС.*
+
+### 2. HikariCP Connection Pool Tuning
+После включения Virtual Threads обнаружилось узкое место: дефолтный пул соединений (10) стал блокировать тысячи виртуальных потоков. Решение:
+- `maximum-pool-size: 20` — оптимально для нашего профиля нагрузки
+- `connection-timeout: 30000` — защита от бесконечного ожидания
+- `leak-detection-threshold: 60000` — логирование утечек соединений
+
+### 3. Kafka Partitions & Consumer Groups
+Топик `program-events` разбит на **3 партиции** с ключом `machineId`:
+- Гарантирует строгий порядок событий для одного станка (все события машины X идут в одну партицию)
+- Позволяет запустить 3 инстанса `user-service` в одной Consumer Group для параллельной обработки аудита
+- При масштабировании просто добавляем партиции и инстансы
+
+### Архитектурная картина под нагрузкой
+1. Клиент отправляет запрос → API Gateway маршрутизирует
+2. `program-service` обрабатывает в виртуальном потоке (не блокирует ОС)
+3. Событие летит в Kafka (партиция по machineId)
+4. `user-service` (3 инстанса) параллельно пишет аудит
+5. Все сервисы подключены к БД через затюненный HikariCP (20 соединений)
+
 ## 🎓 Что показывает проект
 
 - Микросервисная архитектура (3 сервиса)
@@ -354,7 +386,7 @@ curl http://localhost:8080/api/programs
 - Развёртывание на Ubuntu (on-premise, edge computing)
 - Автоматизация установки через bash
 - Работа с Git, CI/CD (заготовки)
-
+- Java 21 Virtual Threads + HikariCP Tuning
 ---
 
 ## Roadmap
@@ -369,3 +401,6 @@ curl http://localhost:8080/api/programs
 - [ ] GitHub Actions (CI)
 - [ ] Testcontainers (интеграционные тесты)
 - [ ] systemd-службы для сервисов
+- [ ] - Тюнинг под highLoad
+
+

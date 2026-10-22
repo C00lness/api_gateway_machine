@@ -240,17 +240,17 @@ sleep 20
 # 6. Создание топика
 # ==========================================
 echo ""
-echo "[6/6] Создание топика program-events..."
+echo "[6/6] Создание топика program-events (3 партиции)..."
 
 bin/kafka-topics.sh --create \
     --topic program-events \
     --bootstrap-server localhost:9092 \
-    --partitions 1 \
-    --replication-factor 1 2>/dev/null || echo "Топик уже существует"
+    --partitions 3 \
+    --replication-factor 1 2>/dev/null || echo "Топик уже существует (если нужно изменить партиции, удалите его и создайте заново)"
 
 echo ""
 echo "======================================"
-echo "Установка завершена!"
+echo " ✅ Установка завершена!"
 echo "======================================"
 echo ""
 echo "PostgreSQL: localhost:5432"
@@ -259,12 +259,11 @@ echo "  - Пользователь: appuser"
 echo "  - Пароль: secret"
 echo ""
 echo "Kafka: localhost:9092"
-echo "  - Топик: program-events"
+echo "  - Топик: program-events (3 партиции)"
 echo "  - Лог: /tmp/kafka.log"
 echo ""
 echo "Проверка Kafka:"
-echo "  /opt/kafka/bin/kafka-topics.sh --list --bootstrap-server localhost:9092"
-echo ""
+echo "  /opt/kafka/bin/kafka-topics.sh --describe --topic program-events --bootstrap-server localhost:9092"
 ```
 
 ### Шаг 2. Сборка JAR-ников

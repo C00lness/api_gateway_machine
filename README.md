@@ -396,11 +396,11 @@ curl http://localhost:8080/api/programs
 - [x] user-service: Kafka Consumer
 - [x] API Gateway
 - [x] setup-all.sh
-- [ ] Запись аудита в БД (таблица `audit_log`)
-- [ ] Prometheus + Grafana
-- [ ] GitHub Actions (CI)
-- [ ] Testcontainers (интеграционные тесты)
-- [ ] systemd-службы для сервисов
-- [ ] - Тюнинг под highLoad
+- [x] Запись аудита в БД (таблица `audit_log`)
+- [x] Prometheus + Grafana
+- [x] GitHub Actions (CI)
+- [x] Testcontainers (интеграционные тесты)
+- [x] systemd-службы для сервисов
+- [x] - Тюнинг под highLoad
 
 

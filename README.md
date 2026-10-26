@@ -344,6 +344,19 @@ curl http://localhost:8080/api/programs
 
 ---
 
+## Разработка под Win (Docker)
+
+Для локальной разработки на Windows мы используем Docker. В корне проекта есть файл `docker-compose.yml`.
+
+1. Убедитесь, что Docker Desktop запущен.
+2. Откройте терминал в папке `api-gateway` и выполните:
+   ```bash
+   docker-compose up -d
+3. Создайте вторую базу данных (для program-service): docker exec -it microservices_postgres psql -U appuser -d userdb -c "CREATE DATABASE program_db;"
+4. Kafka запускается без предсозданного топика — Spring Boot создаст его автоматически при старте program-service (если включено spring.kafka.admin.auto-create-topics=true) или создайте его вручную через docker debug.
+
+---
+
 ## Масштабирование и работа с узкими местами
 
 Проект изначально разрабатывался с учетом масштабирования на парк оборудования. Вот ключевые архитектурные решения:
@@ -402,5 +415,6 @@ curl http://localhost:8080/api/programs
 - [x] Testcontainers (интеграционные тесты)
 - [x] systemd-службы для сервисов
 - [x] - Тюнинг под highLoad
+- [x] - Запуск докера (для разработки локально по Win) 
 
 

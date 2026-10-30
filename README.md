@@ -408,7 +408,7 @@ curl http://localhost:8080/api/programs
 ---
 ## Безопасность (OAuth 2.0 + Keycloak)
 
-В проекте реализована корпоративная аутентификация и авторизация на базе **OAuth 2.0 / OpenID Connect** с использованием **Keycloak** в качестве Identity Provider (IdP).
+Доработка. В проекте реализована корпоративная аутентификация и авторизация на базе **OAuth 2.0 / OpenID Connect** с использованием **Keycloak** в качестве Identity Provider (IdP).
 
 ### Архитектура безопасности
 1. **Keycloak (IdP)** — централизованный сервер авторизации. Хранит пользователей, роли и выдает JWT-токены.
@@ -438,7 +438,7 @@ curl http://localhost:8080/api/programs
      -d "username=ermek" \
      -d "password=secret"
 2. **Проверка:**
-   curl -H "Authorization: Bearer <access_token>" http://localhost:8081/api/users/1
+3.  curl -H "Authorization: Bearer <access_token>" http://localhost:8081/api/users/1
    Без токена сервис возвращает 401 Unauthorized. С валидным токеном — 200 OK (или 404, если эндпоинт не найден).
    ---
 

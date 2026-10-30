@@ -116,6 +116,7 @@ Kafka, PostgreSQL, Spring Security, JWT, API Gateway на edge-узле (про�
 | Ubuntu 24.04 | Среда разработки (on-premise) |
 | Git + GitHub | Версионирование |
 | **JUnit 5 + Mockito + Testcontainers** | Модульное и интеграционное тестирование |
+| keyCloak | Аутентификация и безопасность |
 
 ---
 
@@ -389,19 +390,7 @@ curl http://localhost:8080/api/programs
 4. `user-service` (3 инстанса) параллельно пишет аудит
 5. Все сервисы подключены к БД через затюненный HikariCP (20 соединений)
 
-## Что показывает проект
 
-- Микросервисная архитектура (3 сервиса)
-- Асинхронный обмен через Kafka
-- Spring Security + JWT (BCrypt, фильтры, SecurityContext)
-- Работа с PostgreSQL через JPA/Hibernate
-- Единая точка входа (Spring Cloud Gateway)
-- Мониторинг (Actuator + Micrometer)
-- Развёртывание на Ubuntu (on-premise, edge computing)
-- Автоматизация установки через bash
-- Работа с Git, CI/CD (заготовки)
-- Java 21 Virtual Threads + HikariCP Tuning
----
 ## Тестирование
 
 В проекте реализованы два уровня тестирования:
@@ -451,6 +440,23 @@ curl http://localhost:8080/api/programs
 2. **Проверка:**
    curl -H "Authorization: Bearer <access_token>" http://localhost:8081/api/users/1
    Без токена сервис возвращает 401 Unauthorized. С валидным токеном — 200 OK (или 404, если эндпоинт не найден).
+   ---
+
+## Что показывает проект
+
+- Микросервисная архитектура (3 сервиса)
+- Асинхронный обмен через Kafka
+- Spring Security + JWT (BCrypt, фильтры, SecurityContext)
+- Работа с PostgreSQL через JPA/Hibernate
+- Единая точка входа (Spring Cloud Gateway)
+- Мониторинг (Actuator + Micrometer)
+- Развёртывание на Ubuntu (on-premise, edge computing)
+- Автоматизация установки через bash
+- Работа с Git, CI/CD (заготовки)
+- Java 21 Virtual Threads + HikariCP Tuning
+---
+
+
 ## Roadmap
 
 - [x] user-service: Spring Security + JWT

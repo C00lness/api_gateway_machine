@@ -416,6 +416,41 @@ curl http://localhost:8080/api/programs
 *   **Что тестируем:** Взаимодействие с реальной базой данных PostgreSQL.
 *   **Особенности:** Testcontainers автоматически поднимает Docker-контейнер с БД на время выполнения теста, что гарантирует 100% совпадение с продакшн-средой (без использования in-memory H2).
 
+---
+## Безопасность (OAuth 2.0 + Keycloak)
+
+В проекте реализована корпоративная аутентификация и авторизация на базе **OAuth 2.0 / OpenID Connect** с использованием **Keycloak** в качестве Identity Provider (IdP).
+
+### Архитектура безопасности
+1. **Keycloak (IdP)** — централизованный сервер авторизации. Хранит пользователей, роли и выдает JWT-токены.
+2. **Клиенты (Mobile / Web)** — проходят аутентификацию в Keycloak и получают `access_token`.
+3. **Микросервисы (Resource Servers)** — `user-service` и `program-service` проверяют подпись токена через JWKS-эндпоинт Keycloak и маппят роли из claim'ов.
+
+### Настройка Keycloak (что было сделано)
+- Создан **Realm**: `realm`.
+- Создан **Client**: `program-service` (с включенным Direct Access Grants для тестирования).
+- Создана **Role**: `USER`.
+- Создан **User**: `ermek` с ролью `USER`.
+
+### Интеграция со Spring Security
+- В `pom.xml` добавлена зависимость `spring-boot-starter-oauth2-resource-server`.
+- В `application.properties` указан `issuer-uri` (адрес Keycloak).
+- В `SecurityConfig` настроен `.oauth2ResourceServer(oauth2 -> oauth2.jwt())`.
+- Кастомные `JwtFilter` и `JwtUtil` удалены (Keycloak делает всё сам).
+
+### Как проверить (Пример запроса)
+1. **Получить токен:**
+   ```bash
+   curl -X POST "http://localhost:8180/realms/realm/protocol/openid-connect/token" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "grant_type=password" \
+     -d "client_id=program-service" \
+     -d "client_secret=YOUR_CLIENT_SECRET" \
+     -d "username=ermek" \
+     -d "password=secret"
+2. **Проверка:**
+   curl -H "Authorization: Bearer <access_token>" http://localhost:8081/api/users/1
+   Без токена сервис возвращает 401 Unauthorized. С валидным токеном — 200 OK (или 404, если эндпоинт не найден).
 ## Roadmap
 
 - [x] user-service: Spring Security + JWT
